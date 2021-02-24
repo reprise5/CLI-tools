@@ -23,7 +23,7 @@ do
     fi
 done
 
-sudo /usr/bin/mount -o rw,user,uid=1000,gid=1000 /dev/sd$drive /media/reprise/bay
+sudo /usr/bin/mount -o rw,user /dev/sd$drive /media/reprise/bay
 if [ $? -gt 0 ]; then
     echo "Error $?: Did not mount disk."
 else
