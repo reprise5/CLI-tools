@@ -9,6 +9,7 @@ echo "============================================="
 drive=''
 rpattern='^[a-e]+'		#cannot be /dev/sda to /dev/sde.
 #fpattern='[a-z][0-9]'		#must be proper format. (any letter followed by any number).
+
 while [ ${#drive} -ne 2 ];
 do
     printf "(Give drive letter and partition number) /dev/sd"
@@ -23,9 +24,12 @@ do
     fi
 done
 
-sudo /usr/bin/mount -o rw,user /dev/sd$drive /media/reprise/bay
+sudo /usr/bin/mount -o defaults,rw,user /dev/sd$drive /media/reprise/bay
+
 if [ $? -gt 0 ]; then
     echo "Error $?: Did not mount disk."
 else
+    sudo chown -R $(id -un):$(id -gn) /media/reprise/bay
+    sudo chmod -R 755 /media/reprise/bay
     echo "mounted on /media/reprise/bay"
 fi
