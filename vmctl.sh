@@ -17,6 +17,13 @@ EOF
 	exit 0
 }
 
+function show_home {
+	#options=("POWER ON" "Power VMs On" on "POWER OFF" "Power VMs Off" off "SNAPSHOT" "Take VM Snapshot" off)
+	options=("POWER ON" "Power VMs On" "POWER OFF" "Power VMs Off" "SNAPSHOT" "Take VM Snapshot")
+	#action=`dialog --keep-tite --stdout --radiolist "Select action to perform on VMs" 0 50 0 "${options[@]}"`
+	action=`dialog --keep-tite --menu --stdout "Select action to perform on VMs" 0 50 0 "${options[@]}"`
+}
+
 #-- Give action and cmd.  cmd here is meant to populate the dialog with VM options.
 while getopts uds flag; do
 	case $flag in
@@ -35,11 +42,10 @@ while getopts uds flag; do
 	esac
 done
 
-#-- Check if user didn't pass an option flag by checking if $action is populated.
+#-- Check if user didn't pass an option flag at the command line by checking if $action is populated.
+#-- If not, show a home screen with available options.
 if [ -z "$action" ]; then
-	options=("POWER ON" "Power VMs On" off, "POWER OFF" "Power VMs Off" off, "SNAPSHOT" "Take VM Snapshot" off)
-	action=`dialog --keep-tite --stdout --radiolist "Select action to perform on VMs" 0 50 0 "${options[@]}"`
-	
+	show_home
 fi
 
 #-- Based on option/action, define command to use to fill the VM option list.
@@ -73,10 +79,14 @@ done <<< $($cmd | sort)
 
 #User decides on which machines they want to control.
 if [[ $action == "POWER"* ]]; then
-	choices=`dialog --keep-tite --stdout --checklist "Select VMs to $action" $(($vmcount+8)) 50 $vmcount "${options[@]}"`
+	choices=`dialog --keep-tite --extra-button --extra-label "Back" --stdout --checklist "Select VMs to $action" $(($vmcount+8)) 50 $vmcount "${options[@]}"`
 #	reset
 elif [[ $action == "SNAPSHOT" ]]; then
-	choices=`dialog --keep-tite --stdout --radiolist "Select VMs to $action" $(($vmcount+8)) 50 $vmcount "${options[@]}"`
+	choices=`dialog --keep-tite --extra-button --extra-label "Back" --stdout --radiolist "Select VMs to $action" $(($vmcount+8)) 50 $vmcount "${options[@]}"`
+fi
+
+if [ $? -eq 3 ]; then
+	show_home
 fi
 
 #------------DEBUGGING--------------
