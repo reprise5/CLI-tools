@@ -92,20 +92,21 @@ while [ 1 ]; do
 	if [ $? -eq 3 ]; then
 		show_home
 		choices=""
-	elif [ $choices ]; then
+	elif [[ ! -z "$choices" ]]; then
 	#	break;
 		if [[ $action == "POWER ON" ]]; then
-			vboxmanage startvm $choices --type headless
-			sleep 3; show_home
+			#vboxmanage startvm $choices --type headless
+			dialog --keep-tite --prgbox "Powering up Headless: $choices" "vboxmanage startvm $choices --type headless" 10 110
+			show_home
 		elif [[ $action == "POWER OFF" ]]; then
 			#-- Give them time to power down, or you'll freeze VirtualBox.
 			for i in $choices; do
-				#echo \"powering down $i\" && VBoxManage controlvm $i acpipowerbutton && sleep 4 | dialog --keep-tite --programbox -1 100
-				echo "powering down $i"
-				VBoxManage controlvm $i acpipowerbutton
-				sleep 4
+				dialog --keep-tite --prgbox "Powering down $i" "VBoxManage controlvm $i acpipowerbutton && sleep 2 && echo \"DONE\"" 8 90
+				#echo "powering down $i"
+				#VBoxManage controlvm $i acpipowerbutton
+				#sleep 4
 			done
-			sleep 3; show_home
+			show_home
 		elif [[ $action == "SNAPSHOT" ]]; then
 				#-- Name of the snapshot
 				snapname=`dialog --keep-tite --stdout --title "Name of the Snapshot" --inputbox "Name: " 0 50 "snap-$(date +'%m-%d-%Y_%H:%M:%S')"`
@@ -124,9 +125,10 @@ while [ 1 ]; do
 	#		reset
 			#echo "Taking $([[ $vmstate == "running" ]] && echo "online" || echo "offline") "snapshot of $choices" with name \""$snapname"\""
 			#VBoxManage snapshot "$choices" take \""$snapname"\" $live
-			dialog --keep-tite --prgbox "Taking $([[ $vmstate == "running" ]] && echo "online" || echo "offline") snapshot of $choices with name \"$snapname\"" "VBoxManage snapshot "$choices" take \""$snapname"\" $live 2>&1"  30 100
+			dialog --keep-tite --prgbox "Taking $([[ $vmstate == "running" ]] && echo "online" || echo "offline") snapshot of $choices with name \"$snapname\"" "VBoxManage snapshot "$choices" take \""$snapname"\" $live 2>&1"  10 90
 			show_home
 		fi
+		choices=""
 	else
 		#-- Cancel was probably pressed.
 		break;
